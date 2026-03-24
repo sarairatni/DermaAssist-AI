@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "DermAssist Patient",
+    "slug": "dermassist-patient",
+    "version": "1.0.0",
+    "assetBundlePatterns": ["**/*"],
+    "platforms": ["ios", "android"],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.dermassist.patient"
+    },
+    "android": {
+      "package": "com.dermassist.patient",
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
+    },
+    "plugins": [["expo-image-picker"]],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#2563eb"
+    }
+  }
+}
