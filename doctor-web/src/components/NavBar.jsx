@@ -1,32 +1,63 @@
-import { Link } from 'react-router-dom'
-import { useAuthStore } from '../services/authStore'
+import React from "react";
+import { useAuthStore } from "../services/authStore";
+import { Menu, Search, Bell, User } from "lucide-react";
 
-export default function NavBar() {
-  const logout = useAuthStore((state) => state.logout)
+export default function NavBar({ onMenuClick }) {
+  const { user } = useAuthStore();
+  const doctor = {
+    name: user?.fullName || "Dr. Karim Benali",
+    avatar:
+      user?.fullName
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("") || "DR",
+  };
 
   return (
-    <nav className="bg-blue-600 text-white p-4 shadow">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold">DermAssist</h1>
-        
-        <div className="flex gap-4">
-          <Link to="/dashboard" className="hover:bg-blue-700 px-3 py-2 rounded">
-            Dashboard
-          </Link>
-          <Link to="/patients" className="hover:bg-blue-700 px-3 py-2 rounded">
-            Patients
-          </Link>
-          <button
-            onClick={() => {
-              logout()
-              window.location.href = '/login'
-            }}
-            className="hover:bg-red-600 px-3 py-2 rounded bg-red-500"
-          >
-            Logout
-          </button>
+    <div className="bg-white border-b border-gray-300 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
+      {/* Left - Menu Toggle & Search */}
+      <div className="flex items-center gap-6 flex-1">
+        {/* Menu Toggle */}
+        <button
+          onClick={onMenuClick}
+          className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition"
+          title="Toggle Sidebar"
+        >
+          <Menu size={20} />
+        </button>
+
+        {/* Search Input */}
+        <div className="flex-1 max-w-md flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-teal-500">
+          <Search size={18} className="text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search patient..."
+            className="flex-1 bg-transparent text-gray-700 placeholder-gray-500 focus:outline-none"
+          />
         </div>
       </div>
-    </nav>
-  )
+
+      {/* Right - Notifications & Profile */}
+      <div className="flex items-center gap-4">
+        {/* Notification Bell */}
+        <button className="relative w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+          <Bell size={20} />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+
+        {/* Doctor Profile */}
+        <div className="flex items-center gap-3 pl-4 border-l border-gray-300">
+          {/* Avatar */}
+          <div className="w-10 h-10 bg-[#0F6E56] rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <User size={18} />
+          </div>
+
+          {/* Name */}
+          <span className="font-medium text-gray-800 text-sm">
+            {doctor.name}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
