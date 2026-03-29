@@ -1,11 +1,13 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../services/authStore";
 import { Menu, Search, Bell, User } from "lucide-react";
 
 export default function NavBar({ onMenuClick }) {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const doctor = {
-    name: user?.fullName || "Dr. Karim Benali",
+    name: user?.fullName || "Dr. Ahmed Medina",
     avatar:
       user?.fullName
         ?.split(" ")
@@ -40,13 +42,20 @@ export default function NavBar({ onMenuClick }) {
       {/* Right - Notifications & Profile */}
       <div className="flex items-center gap-4">
         {/* Notification Bell */}
-        <button className="relative w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition">
+        <button
+          onClick={() => navigate("/notifications")}
+          className="relative w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition"
+          title="View Notifications"
+        >
           <Bell size={20} />
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
 
         {/* Doctor Profile */}
-        <div className="flex items-center gap-3 pl-4 border-l border-gray-300">
+        <div
+          onClick={() => navigate("/profile")}
+          className="flex items-center gap-3 pl-4 border-l border-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
+        >
           {/* Avatar */}
           <div className="w-10 h-10 bg-[#0F6E56] rounded-full flex items-center justify-center text-white font-bold text-sm">
             <User size={18} />

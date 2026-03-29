@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import Sidebar from "../components/Sidebar";
 import {
@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 const API_URL = "http://localhost:8000";
 
 export default function PatientsPage() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [patientsList, setPatientsList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,7 @@ export default function PatientsPage() {
     phone: "",
     birth_date: "",
     medical_history: "",
+    insuf_cardiaque: "undefined",
   });
 
   // Load patients from database
@@ -210,7 +212,7 @@ export default function PatientsPage() {
 
       const response = await axios.patch(
         `${API_URL}/patients/${patientToEdit.id}/update-simple`,
-        payload
+        payload,
       );
 
       console.log("Update response:", response.data);
@@ -218,8 +220,8 @@ export default function PatientsPage() {
       // Update the patient in the list
       setPatientsList(
         patientsList.map((p) =>
-          p.id === patientToEdit.id ? response.data : p
-        )
+          p.id === patientToEdit.id ? response.data : p,
+        ),
       );
 
       setShowEditModal(false);
@@ -469,6 +471,7 @@ export default function PatientsPage() {
                         {/* Actions */}
                         <div className="col-span-2 flex items-center gap-2">
                           <button
+                            onClick={() => navigate(`/patients/${patient.id}`)}
                             className="p-2 hover:bg-blue-50 rounded-lg transition-all text-blue-600 hover:text-blue-700"
                             title="View details"
                           >
@@ -781,9 +784,7 @@ export default function PatientsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-96 overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
-              <h2 className="text-xl font-bold text-gray-800">
-                Edit Patient
-              </h2>
+              <h2 className="text-xl font-bold text-gray-800">Edit Patient</h2>
               <button
                 onClick={cancelEdit}
                 className="text-gray-500 hover:text-gray-700"

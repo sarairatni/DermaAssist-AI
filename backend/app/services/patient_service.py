@@ -31,19 +31,14 @@ class PatientService:
         return db.query(Patient).all()
 
     @staticmethod
-    def get_patient_details(db: Session, patient_id: str, doctor_id: str) -> Patient:
-        """Récupérer les détails complets d'un patient (le médecin doit être son médecin traitant)."""
-        patient = db.query(Patient).filter(
-            and_(
-                Patient.id == patient_id,
-                Patient.doctor_id == doctor_id
-            )
-        ).first()
+    def get_patient_details(db: Session, patient_id: str, doctor_id: str = None) -> Patient:
+        """Récupérer les détails complets d'un patient."""
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
         
         if not patient:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found"
             )
         return patient
 

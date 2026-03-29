@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.security import get_current_user, get_doctor_role, get_patient_role
@@ -46,8 +46,8 @@ def list_patients(
             "age": patient.age,
             "phone": patient.phone,
             "birth_date": str(patient.birth_date) if patient.birth_date else None,
-            "fitzpatrick_type": patient.fitzpatrick_type,
-            "city": str(patient.city),
+            "fitzpatrick_type": patient.fitzpatrick_type.value if patient.fitzpatrick_type else None,
+            "city": patient.city.value if patient.city else None,
             "medical_history": patient.medical_history,
             "doctor_id": str(patient.doctor_id) if patient.doctor_id else None,
             "created_at": patient.created_at.isoformat() if patient.created_at else None
@@ -87,8 +87,8 @@ def create_patient_simple(
             "age": patient.age,
             "phone": patient.phone,
             "birth_date": str(patient.birth_date) if patient.birth_date else None,
-            "fitzpatrick_type": str(patient.fitzpatrick_type),
-            "city": str(patient.city),
+            "fitzpatrick_type": patient.fitzpatrick_type.value if patient.fitzpatrick_type else None,
+            "city": patient.city.value if patient.city else None,
             "medical_history": patient.medical_history,
             "doctor_id": str(patient.doctor_id) if patient.doctor_id else None,
             "created_at": patient.created_at.isoformat() if patient.created_at else None
@@ -129,15 +129,34 @@ def get_current_patient(
     return PatientService.get_patient_by_user_id(db, user_id)
 
 
-@router.get("/{patient_id}", response_model=PatientResponse)
+@router.get("/{patient_id}")
 def get_patient(
     patient_id: str,
-    current_user: dict = Depends(get_doctor_role),
     db: Session = Depends(get_db)
 ):
     """Récupérer le dossier complet d'un patient."""
-    doctor_id = current_user["user_id"]
-    return PatientService.get_patient_details(db, patient_id, doctor_id)
+    patient = PatientService.get_patient_details(db, patient_id, None)
+    
+    user = db.query(User).filter(User.id == patient.user_id).first()
+    patient_dict = {
+        "id": str(patient.id),
+        "user_id": str(patient.user_id),
+        "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "full_name": user.full_name
+        } if user else None,
+        "full_name": patient.full_name,
+        "age": patient.age,
+        "phone": patient.phone,
+        "birth_date": str(patient.birth_date) if patient.birth_date else None,
+        "fitzpatrick_type": patient.fitzpatrick_type.value if patient.fitzpatrick_type else None,
+        "city": patient.city.value if patient.city else None,
+        "medical_history": patient.medical_history,
+        "doctor_id": str(patient.doctor_id) if patient.doctor_id else None,
+        "created_at": patient.created_at.isoformat() if patient.created_at else None
+    }
+    return patient_dict
 
 
 @router.patch("/{patient_id}", response_model=PatientResponse)

@@ -81,10 +81,9 @@ class DiagnosisAwareRetriever:
             f"protocole traitement {module1.condition_name}",
             f"confiance {confidence_level}",
             f"patient âge {patient.age} ans",
-            f"Fitzpatrick {patient.fitzpatrick}",
-            f"sexe {patient.sexe}",
+            f"Fitzpatrick {getattr(patient, 'fitzpatrick', 'unknown')}",
         ]
-        if patient.antecedents:
+        if hasattr(patient, 'antecedents') and patient.antecedents:
             parts.append(f"antécédents: {', '.join(patient.antecedents)}")
         # Add structured comorbidities to query
         comorbidites = []
@@ -235,20 +234,27 @@ class ClinicalGenerator:
 
     def generate_analyse_initiale(self, module1, patient, condition_data, confidence_level, retrieved_chunks) -> dict:
         alternatives_str = ", ".join(f"{a['name']} ({int(a['confidence']*100)}%)" for a in module1.top_alternatives[:2]) or "aucune"
+        patient_sexe = getattr(patient, 'sexe', 'unknown')
+        patient_fitzpatrick = getattr(patient, 'fitzpatrick', 'unknown')
+        patient_antecedents = getattr(patient, 'antecedents', [])
         prompt = ANALYSE_INITIALE_PROMPT.format(
-            age=patient.age, sexe=patient.sexe, fitzpatrick=patient.fitzpatrick,
-            antecedents=", ".join(patient.antecedents) or "aucun",
+            age=patient.age, sexe=patient_sexe, fitzpatrick=patient_fitzpatrick,
+            antecedents=", ".join(patient_antecedents) or "aucun",
             comorbidites=self._build_comorbidites_str(patient),
             condition_name=module1.condition_name, icd10=condition_data.get("icd10", "N/A"),
             confidence_pct=int(module1.confidence * 100), confidence_level=confidence_level,
             alternatives=alternatives_str, retrieved_chunks="\n---\n".join(retrieved_chunks[:2]),
         )
         return self._call_gemini(prompt)
-
-    def generate_analyse_affinee(self, module1, patient, condition_data, confidence_level, retrieved_chunks, question_answers) -> dict:
-        answers_text = "\n".join(f"- {qa['question']}: {qa['answer']}" for qa in question_answers) or "Aucune réponse"
+atient_sexe = getattr(patient, 'sexe', 'unknown')
+        patient_fitzpatrick = getattr(patient, 'fitzpatrick', 'unknown')
+        patient_antecedents = getattr(patient, 'antecedents', [])
+        patient_ville = getattr(patient, 'ville', 'unknown')
         prompt = ANALYSE_AFFINEE_PROMPT.format(
-            age=patient.age, sexe=patient.sexe, fitzpatrick=patient.fitzpatrick,
+            age=patient.age, sexe=patient_sexe, fitzpatrick=patient_fitzpatrick,
+            antecedents=", ".join(patient_antecedents) or "aucun",
+            comorbidites=self._build_comorbidites_str(patient),
+            ville=patient_e, sexe=patient.sexe, fitzpatrick=patient.fitzpatrick,
             antecedents=", ".join(patient.antecedents) or "aucun",
             comorbidites=self._build_comorbidites_str(patient),
             ville=patient.ville, condition_name=module1.condition_name,
